@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>g_lovers 出欠管理 安定版</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--ink:#172033;--muted:#6b7280;--line:#e5e7eb;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--orange:#f59e0b;--purple:#7c3aed}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;background:var(--bg);color:var(--ink)}
+header{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;padding:15px 16px 12px}header h1{margin:0;font-size:20px}header p{margin:4px 0 0;font-size:12px;opacity:.9}
+main{max-width:920px;margin:auto;padding:12px 12px 90px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}.tab{border:0;border-radius:12px;padding:11px;background:#e8edf7;font-weight:800}.tab.active{background:var(--blue);color:#fff}.panel{display:none}.panel.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px;margin-bottom:11px;box-shadow:0 8px 24px rgba(15,23,42,.06)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end}.grow{flex:1;min-width:140px}label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}input,select{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;background:#fff}.btn{border:0;border-radius:10px;padding:10px 13px;font-weight:800}.primary{background:var(--blue);color:#fff}.secondary{background:#e2e8f0;color:#334155}.danger{background:#fee2e2;color:#991b1b}.warn{background:#fef3c7;color:#92400e}.small{padding:7px 9px;font-size:12px}
+.calendar-head{display:flex;justify-content:space-between;align-items:center}.calendar-head h2{margin:0;font-size:18px}.nav{width:38px;height:38px;border:0;border-radius:50%;font-size:22px}.week,.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.week div{text-align:center;font-size:11px;color:var(--muted);font-weight:800;padding:7px 0}.day{min-height:52px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:5px;text-align:left;position:relative}.day.other{opacity:.35}.day.selected{background:#dbeafe;border:2px solid var(--blue)}.day.today{box-shadow:inset 0 0 0 2px #93c5fd}.day .n{font-weight:800}.day .count{position:absolute;right:4px;bottom:4px;background:#ede9fe;color:#6d28d9;border-radius:999px;padding:2px 6px;font-size:10px;font-weight:800}
+.class-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.class-btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 4px;font-weight:800}.class-btn.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+.titlebar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.titlebar h2{margin:0;font-size:17px}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:11px}.sub{font-size:12px;color:var(--muted);margin-top:3px}.empty{text-align:center;color:var(--muted);padding:24px 6px}
+.student{border-top:1px solid var(--line);padding:12px 0}.student:first-child{border-top:0}.student-main{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}.name{font-weight:900}.actions{display:flex;gap:6px;flex-wrap:wrap}.status{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;font-weight:800}.status.present.on{background:#dcfce7;border-color:#86efac;color:#166534}.status.absent.on{background:#fee2e2;border-color:#fca5a5;color:#991b1b}.makeup{margin-top:9px;padding:10px;border:1px solid #fed7aa;background:#fff7ed;border-radius:12px}.makeup-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.inline-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.inline-actions .btn{flex:1}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:11px}.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}.stat b{display:block;font-size:21px}.stat span{font-size:11px;color:var(--muted)}
+.student-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border-top:1px solid var(--line);padding:10px 0}.student-row:first-child{border-top:0}.days{display:flex;gap:5px;flex-wrap:wrap}.daycheck{display:flex;align-items:center;gap:2px;font-size:13px}.daycheck input{width:auto}.footer{text-align:center;font-size:11px;color:var(--muted);padding:10px}.hidden{display:none!important}
+@media(max-width:650px){.class-grid{grid-template-columns:repeat(2,1fr)}.student-main{grid-template-columns:1fr}.makeup-grid{grid-template-columns:1fr}.row>.btn{width:100%}.day{min-height:47px}.actions button{flex:1}}
+</style>
+</head>
+<body>
+<header><h1>🤸 g_lovers 出欠管理</h1><p>完全新規・安定版</p></header>
+<main>
+<div class="tabs">
+<button class="tab active" data-panel="calendarPanel">カレンダー</button>
+<button class="tab" data-panel="studentsPanel">生徒</button>
+<button class="tab" data-panel="dataPanel">保存</button>
+</div>
+
+<section id="calendarPanel" class="panel active">
+<div class="card">
+<div class="calendar-head"><button id="prevMonth" class="nav">‹</button><h2 id="monthTitle"></h2><button id="nextMonth" class="nav">›</button></div>
+<div class="week"><div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div></div>
+<div id="calendar" class="calendar"></div>
+</div>
+<div class="card"><label>クラス</label><div id="classGrid" class="class-grid"></div></div>
+<div class="card">
+<div class="titlebar"><div><h2 id="selectedTitle"></h2><div id="rosterState" class="sub"></div></div><span id="rosterCount" class="badge">0名</span></div>
+<div class="row" style="margin-top:10px"><button id="copyPrev" class="btn primary">前週の名簿をコピー</button><button id="copyRegular" class="btn secondary">定期メンバーを反映</button><button id="deleteDay" class="btn danger">この日の記録を削除</button></div>
+</div>
+<div class="stats"><div class="stat"><b id="presentCount">0</b><span>出席</span></div><div class="stat"><b id="absentCount">0</b><span>欠席</span></div><div class="stat"><b id="pendingCount">0</b><span>未入力</span></div></div>
+<div class="card"><div id="attendanceList"></div></div>
+</section>
+
+<section id="studentsPanel" class="panel">
+<div class="card"><h2 style="font-size:17px;margin-top:0">生徒登録</h2>
+<div class="row"><div class="grow"><label>氏名</label><input id="studentName" type="text"></div><div class="grow"><label>クラス</label><select id="studentClass"></select></div></div>
+<div style="margin-top:10px"><label>通常参加曜日</label><div id="weekdayChecks" class="days"></div></div>
+<div class="row" style="margin-top:10px"><div class="grow"><label>メモ</label><input id="studentMemo" type="text"></div><button id="addStudent" class="btn primary">登録する</button></div>
+</div>
+<div class="card"><div class="titlebar"><h2>生徒一覧</h2><span id="studentCount" class="badge">0名</span></div><div id="studentList"></div></div>
+</section>
+
+<section id="dataPanel" class="panel">
+<div class="card"><h2 style="font-size:17px;margin-top:0">バックアップ</h2><div class="row"><button id="backupBtn" class="btn primary">バックアップを共有・保存</button><button id="copyBackupBtn" class="btn secondary">バックアップ文字をコピー</button><label class="btn secondary" style="margin:0">バックアップ読込<input id="restoreInput" class="hidden" type="file" accept="application/json,.json,text/plain"></label><button id="resetBtn" class="btn danger">全データ削除</button></div><textarea id="backupText" class="hidden" style="width:100%;min-height:180px;margin-top:10px;border:1px solid #cbd5e1;border-radius:10px;padding:10px"></textarea></div>
+<div class="card"><p class="sub">データはこの端末のブラウザ内に保存されます。Safariで開いてホーム画面に追加すると使いやすくなります。</p></div>
+</section>
+<div id="status" class="footer">アプリ正常動作中</div>
+</main>
+<script>
+(function(){
+'use strict';
+var KEY='glovers_stable_v1';
+var CLASSES=['大人','体操','トランポリン','アクロバット'];
+var WD=['日','月','火','水','木','金','土'];
+var db=load();
+var now=new Date();
+var selectedDate=iso(now);
+var viewYear=now.getFullYear();
+var viewMonth=now.getMonth();
+var selectedClass='体操';
+function el(id){return document.getElementById(id)}
+function load(){try{var x=JSON.parse(localStorage.getItem(KEY));if(x&&x.students&&x.days)return x}catch(e){}return{students:[],days:{}}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db));return true}catch(e){alert('保存できません。Safariで開いてください。');return false}}
+function iso(d){var y=d.getFullYear();var m=('0'+(d.getMonth()+1)).slice(-2);var day=('0'+d.getDate()).slice(-2);return y+'-'+m+'-'+day}
+function parseDate(s){var a=s.split('-');return new Date(Number(a[0]),Number(a[1])-1,Number(a[2]))}
+function addDays(s,n){var d=parseDate(s);d.setDate(d.getDate()+n);return iso(d)}
+function dayKey(date,cls){return date+'|'+cls}
+function getDay(date,cls){return db.days[dayKey(date,cls)]||null}
+function ensureDay(date,cls){var k=dayKey(date,cls);if(!db.days[k])db.days[k]={roster:[],records:{},excluded:[]};return db.days[k]}
+function regularRoster(date,cls){var w=parseDate(date).getDay();var out=[];for(var i=0;i<db.students.length;i++){var s=db.students[i];if(s.className===cls&&s.weekdays.indexOf(w)!==-1)out.push(s.id)}return out}
+function effectiveRoster(date,cls){var d=getDay(date,cls);if(d)return d.roster.slice();return regularRoster(date,cls)}
+function studentById(id){for(var i=0;i<db.students.length;i++)if(db.students[i].id===id)return db.students[i];return null}
+function setStatus(msg){el('status').textContent=msg}
+function formatDate(s){var d=parseDate(s);return (d.getMonth()+1)+'月'+d.getDate()+'日（'+WD[d.getDay()]+'）'}
+function init(){
+ el('studentClass').innerHTML='';for(var i=0;i<CLASSES.length;i++){var o=document.createElement('option');o.value=CLASSES[i];o.textContent=CLASSES[i];el('studentClass').appendChild(o)}
+ for(var j=0;j<WD.length;j++){var lab=document.createElement('label');lab.className='daycheck';var c=document.createElement('input');c.type='checkbox';c.value=j;lab.appendChild(c);lab.appendChild(document.createTextNode(WD[j]));el('weekdayChecks').appendChild(lab)}
+ for(var k=0;k<CLASSES.length;k++){(function(cls){var b=document.createElement('button');b.className='class-btn';b.textContent=cls;b.addEventListener('click',function(){selectedClass=cls;renderAll()});el('classGrid').appendChild(b)})(CLASSES[k])}
+ bind();renderAll();
+}
+function bind(){
+ var tabs=document.querySelectorAll('.tab');for(var i=0;i<tabs.length;i++)tabs[i].addEventListener('click',function(){var all=document.querySelectorAll('.tab,.panel');for(var a=0;a<all.length;a++)all[a].classList.remove('active');this.classList.add('active');el(this.getAttribute('data-panel')).classList.add('active')});
+ el('prevMonth').addEventListener('click',function(){viewMonth--;if(viewMonth<0){viewMonth=11;viewYear--}renderCalendar()});
+ el('nextMonth').addEventListener('click',function(){viewMonth++;if(viewMonth>11){viewMonth=0;viewYear++}renderCalendar()});
+ el('addStudent').addEventListener('click',addStudent);
+ el('copyPrev').addEventListener('click',copyPrev);
+ el('copyRegular').addEventListener('click',copyRegular);
+ el('deleteDay').addEventListener('click',deleteDay);
+ el('attendanceList').addEventListener('click',attendanceClick);
+ el('studentList').addEventListener('click',studentClick);
+ el('backupBtn').addEventListener('click',backup);
+ el('copyBackupBtn').addEventListener('click',copyBackupText);
+ el('restoreInput').addEventListener('change',restore);
+ el('resetBtn').addEventListener('click',resetAll);
+}
+function renderAll(){renderCalendar();renderClasses();renderAttendance();renderStudents()}
+function renderCalendar(){
+ el('monthTitle').textContent=viewYear+'年 '+(viewMonth+1)+'月';var box=el('calendar');box.innerHTML='';var first=new Date(viewYear,viewMonth,1);var start=new Date(viewYear,viewMonth,1-first.getDay());for(var i=0;i<42;i++){var d=new Date(start);d.setDate(start.getDate()+i);var ds=iso(d);var b=document.createElement('button');b.className='day';if(d.getMonth()!==viewMonth)b.className+=' other';if(ds===selectedDate)b.className+=' selected';if(ds===iso(new Date()))b.className+=' today';b.setAttribute('data-date',ds);var n=document.createElement('span');n.className='n';n.textContent=d.getDate();b.appendChild(n);var count=0;for(var c=0;c<CLASSES.length;c++)count+=effectiveRoster(ds,CLASSES[c]).length;if(count){var cnt=document.createElement('span');cnt.className='count';cnt.textContent=count;b.appendChild(cnt)}b.addEventListener('click',function(){selectedDate=this.getAttribute('data-date');var pd=parseDate(selectedDate);viewYear=pd.getFullYear();viewMonth=pd.getMonth();renderAll()});box.appendChild(b)}
+}
+function renderClasses(){var bs=document.querySelectorAll('.class-btn');for(var i=0;i<bs.length;i++){if(bs[i].textContent===selectedClass)bs[i].classList.add('active');else bs[i].classList.remove('active')}}
+function renderAttendance(){
+ var day=getDay(selectedDate,selectedClass);var roster=effectiveRoster(selectedDate,selectedClass);el('selectedTitle').textContent=formatDate(selectedDate)+' '+selectedClass;el('rosterCount').textContent=roster.length+'名';el('rosterState').textContent=day?(day.cleared?'この日は削除済み':'保存済み名簿'):'定期メンバーを自動表示';var box=el('attendanceList');box.innerHTML='';var p=0,a=0;if(!roster.length){box.innerHTML='<div class="empty">名簿がありません</div>'}else{for(var i=0;i<roster.length;i++){var s=studentById(roster[i]);if(!s)continue;var rec=day&&day.records[s.id]?day.records[s.id]:{};if(rec.status==='present')p++;if(rec.status==='absent')a++;box.appendChild(studentCard(s,rec))}}el('presentCount').textContent=p;el('absentCount').textContent=a;el('pendingCount').textContent=roster.length-p-a}
+function studentCard(s,rec){
+ var wrap=document.createElement('div');wrap.className='student';wrap.setAttribute('data-id',s.id);var main=document.createElement('div');main.className='student-main';var left=document.createElement('div');left.innerHTML='<div class="name"></div><div class="sub"></div>';left.children[0].textContent=s.name;left.children[1].textContent=s.memo||'';var actions=document.createElement('div');actions.className='actions';actions.innerHTML='<button class="status present" data-action="present">✓ 出席</button><button class="status absent" data-action="absent">欠席</button><button class="btn danger small" data-action="remove">名簿から削除</button>';if(rec.status==='present')actions.children[0].classList.add('on');if(rec.status==='absent')actions.children[1].classList.add('on');main.appendChild(left);main.appendChild(actions);wrap.appendChild(main);if(rec.status==='absent'){var m=document.createElement('div');m.className='makeup';m.innerHTML='<div class="makeup-grid"><div><label>振替日</label><input class="makeup-date" type="date"></div><div><label>振替クラス</label><select class="makeup-class"></select></div></div><div class="inline-actions"><button class="btn warn" data-action="undecided">振替未定</button><button class="btn primary" data-action="save-makeup">振替先へ追加</button></div><div class="sub makeup-note"></div>';m.querySelector('.makeup-date').value=rec.makeupDate||'';var sel=m.querySelector('.makeup-class');for(var i=0;i<CLASSES.length;i++){var o=document.createElement('option');o.value=CLASSES[i];o.textContent=CLASSES[i];if(rec.makeupClass===CLASSES[i])o.selected=true;sel.appendChild(o)}if(rec.makeupPending)m.querySelector('.makeup-note').textContent='振替未定';else if(rec.makeupDate)m.querySelector('.makeup-note').textContent='振替先：'+rec.makeupDate+'／'+rec.makeupClass;wrap.appendChild(m)}return wrap}
+function attendanceClick(e){var action=e.target.getAttribute('data-action');if(!action)return;var row=e.target;while(row&& !row.getAttribute('data-id'))row=row.parentNode;if(!row)return;var id=row.getAttribute('data-id');if(action==='present'||action==='absent'){var d=ensureDay(selectedDate,selectedClass);if(d.roster.indexOf(id)===-1)d.roster.push(id);d.cleared=false;var old=d.records[id]||{};var ns=old.status===action?'':action;d.records[id]={status:ns};save();renderAll();setStatus('出欠を更新しました')}else if(action==='remove'){var day=ensureDay(selectedDate,selectedClass);day.roster=day.roster.filter(function(x){return x!==id});delete day.records[id];save();renderAll();setStatus('名簿から削除しました')}else if(action==='undecided'){var du=ensureDay(selectedDate,selectedClass);if(du.roster.indexOf(id)===-1)du.roster.push(id);du.cleared=false;du.records[id]={status:'absent',makeupPending:true};save();renderAll();setStatus('振替未定で保存しました')}else if(action==='save-makeup'){var date=row.querySelector('.makeup-date').value;var cls=row.querySelector('.makeup-class').value;if(!date){alert('振替日を選んでください');return}var ds=ensureDay(selectedDate,selectedClass);ds.cleared=false;ds.records[id]={status:'absent',makeupPending:false,makeupDate:date,makeupClass:cls};var dest=ensureDay(date,cls);if(dest.roster.indexOf(id)===-1)dest.roster.push(id);save();renderAll();setStatus('振替先へ追加しました')}}
+function addStudent(){var name=el('studentName').value.replace(/^\s+|\s+$/g,'');if(!name){alert('氏名を入力してください');return}var checks=el('weekdayChecks').querySelectorAll('input:checked');var w=[];for(var i=0;i<checks.length;i++)w.push(Number(checks[i].value));db.students.push({id:'s'+new Date().getTime()+Math.floor(Math.random()*1000),name:name,className:el('studentClass').value,weekdays:w,memo:el('studentMemo').value});el('studentName').value='';el('studentMemo').value='';var all=el('weekdayChecks').querySelectorAll('input');for(var j=0;j<all.length;j++)all[j].checked=false;save();renderAll();setStatus('生徒を登録しました')}
+function renderStudents(){el('studentCount').textContent=db.students.length+'名';var box=el('studentList');box.innerHTML='';if(!db.students.length){box.innerHTML='<div class="empty">生徒が登録されていません</div>';return}for(var i=0;i<db.students.length;i++){var s=db.students[i];var r=document.createElement('div');r.className='student-row';r.setAttribute('data-id',s.id);var left=document.createElement('div');var days=[];for(var j=0;j<s.weekdays.length;j++)days.push(WD[s.weekdays[j]]);left.innerHTML='<div class="name"></div><div class="sub"></div>';left.children[0].textContent=s.name+'【'+s.className+'】';left.children[1].textContent=(days.length?days.join('・'):'曜日未設定')+(s.memo?'／'+s.memo:'');var b=document.createElement('button');b.className='btn danger small';b.setAttribute('data-action','delete-student');b.textContent='削除';r.appendChild(left);r.appendChild(b);box.appendChild(r)}}
+function studentClick(e){if(e.target.getAttribute('data-action')!=='delete-student')return;var row=e.target.parentNode;var id=row.getAttribute('data-id');db.students=db.students.filter(function(s){return s.id!==id});for(var k in db.days){if(db.days.hasOwnProperty(k)){db.days[k].roster=db.days[k].roster.filter(function(x){return x!==id});delete db.days[k].records[id]}}save();renderAll();setStatus('生徒を削除しました')}
+function applyRoster(ids,msg){var d=ensureDay(selectedDate,selectedClass);d.roster=[];for(var i=0;i<ids.length;i++)if(studentById(ids[i])&&d.roster.indexOf(ids[i])===-1)d.roster.push(ids[i]);d.records={};d.excluded=[];d.cleared=false;save();renderAll();setStatus(msg+'（'+d.roster.length+'名）')}
+function copyPrev(){var ids=effectiveRoster(addDays(selectedDate,-7),selectedClass);if(!ids.length){alert('前週の同じ曜日・クラスに名簿がありません');return}applyRoster(ids,'前週の名簿をコピーしました')}
+function copyRegular(){var ids=regularRoster(selectedDate,selectedClass);if(!ids.length){alert('この曜日・クラスの定期メンバーがいません');return}applyRoster(ids,'定期メンバーを反映しました')}
+function deleteDay(){var k=dayKey(selectedDate,selectedClass);db.days[k]={roster:[],records:{},excluded:[],cleared:true};save();renderAll();setStatus('この日の名簿と記録を削除しました')}
+function backup(){
+ var text=JSON.stringify(db,null,2);
+ var blob=new Blob([text],{type:'application/json'});
+ var file=null;
+ try{file=new File([blob],'g_lovers_バックアップ.json',{type:'application/json'})}catch(e){}
+ if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+  navigator.share({files:[file],title:'g_lovers バックアップ'}).then(function(){setStatus('バックアップを共有しました')}).catch(function(err){if(err&&err.name!=='AbortError')downloadBackup(blob)});
+  return;
+ }
+ downloadBackup(blob);
+}
+function downloadBackup(blob){
+ try{
+  var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='g_lovers_バックアップ.json';a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url)},1500);setStatus('バックアップ保存を開始しました');
+ }catch(e){showBackupText()}
+}
+function showBackupText(){var t=el('backupText');t.value=JSON.stringify(db,null,2);t.classList.remove('hidden');t.focus();t.select();setStatus('保存できない場合は表示された文字をコピーしてください')}
+function copyBackupText(){var text=JSON.stringify(db,null,2);if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){setStatus('バックアップ文字をコピーしました')}).catch(function(){legacyCopy(text)})}else{legacyCopy(text)}}
+function legacyCopy(text){var t=el('backupText');t.value=text;t.classList.remove('hidden');t.focus();t.select();try{document.execCommand('copy');setStatus('バックアップ文字をコピーしました')}catch(e){setStatus('文字を長押ししてコピーしてください')}}
+function restore(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var x=JSON.parse(r.result);if(!x.students||!x.days)throw new Error();db=x;save();renderAll();setStatus('バックアップを読み込みました')}catch(err){alert('正しいバックアップではありません')}};r.readAsText(f)}
+function resetAll(){db={students:[],days:{}};save();renderAll();setStatus('全データを削除しました')}
+init();
+})();
+</script>
+</body>
+</html>
